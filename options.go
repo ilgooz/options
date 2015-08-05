@@ -3,6 +3,8 @@ package options
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/guregu/null"
 )
 
 type (
@@ -62,7 +64,14 @@ func (en encoding) encode(e reflect.Value) Option {
 
 	o := Option{}
 	for i, name := range en.names {
-		o[name] = fmt.Sprintf("%v", e.Field(i).Interface())
+		val := e.Field(i).Interface()
+		if s, ok := val.(null.String); ok {
+			val = s.String
+		}
+		if i, ok := val.(null.Int); ok {
+			val = i.Int64
+		}
+		o[name] = fmt.Sprintf("%v", val)
 	}
 	return o
 }
